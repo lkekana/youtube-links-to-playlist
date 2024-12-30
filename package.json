@@ -8,7 +8,7 @@
     "build": "webpack --config webpack/webpack.prod.js",
     "clean": "rimraf dist",
     "test": "npx jest",
-    "style": "prettier --write \"src/**/*.{ts,tsx}\""
+    "style": "biome format --write \"**/*.{ts,tsx}\""
   },
   "author": "",
   "license": "MIT",
@@ -24,6 +24,7 @@
     "tailwindcss": "^3.4.17"
   },
   "devDependencies": {
+    "@biomejs/biome": "1.9.4",
     "@types/chrome": "0.0.158",
     "@types/jest": "^29.5.0",
     "@types/react": "^18.0.29",

@@ -8,5 +8,13 @@
             ],
             "url": "http://json.schemastore.org/chrome-manifest"
         }
-    ]
+    ],
+    "editor.defaultFormatter": "biomejs.biome",
+    "npm.packageManager": "pnpm",
+    "deno.lint": false,
+    "eslint.enable": false,
+    "oxc.enable": false,
+    "[typescriptreact]": {
+        "editor.defaultFormatter": "biomejs.biome"
+    },
 }
