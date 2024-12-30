@@ -1,111 +1,84 @@
 import React, { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
-import "../public/shadcn-inspired-classless.css";
+import "./tailwind.css";
+
+const INSTRUCTION_TEXT = `Enter your YouTube video link(s) here. 1 video link per line.
+Both video links & IDs are supported.
+
+You can also paste a playlist link to add all videos in the playlist
+(playlist links must be in the form: https://www.youtube.com/playlist?list={playlist_id})`;
+
+const LINK_BOX_PLACEHOLDER = `Examples:
+https://www.youtube.com/watch?v=pZwvrxVavnQ
+https://www.youtube.com/watch?v=Rk2FR8YflrE&t=1s
+https://youtu.be/3xottY-7m3k
+lVWwwfcQ5FA
+https://www.youtube.com/playlist?list=PL6o_hmrw5tQgwYP3ra-uoPjCMHUFRoW24
+`;
 
 const Popup = () => {
-  const [count, setCount] = useState(0);
-  const [currentURL, setCurrentURL] = useState<string>();
+	const [count, setCount] = useState(0);
+	const [currentURL, setCurrentURL] = useState<string>();
 
-  useEffect(() => {
-    chrome.action.setBadgeText({ text: count.toString() });
-  }, [count]);
+	useEffect(() => {
+		chrome.action.setBadgeText({ text: count.toString() });
+	}, [count]);
 
-  useEffect(() => {
-    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-      setCurrentURL(tabs[0].url);
-    });
-  }, []);
+	useEffect(() => {
+		chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+			setCurrentURL(tabs[0].url);
+		});
+	}, []);
 
-  const changeBackground = () => {
-    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-      const tab = tabs[0];
-      if (tab.id) {
-        chrome.tabs.sendMessage(
-          tab.id,
-          {
-            color: "#555555",
-          },
-          (msg) => {
-            console.log("result message:", msg);
-          }
-        );
-      }
-    });
-  };
+	const changeBackground = () => {
+		chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+			const tab = tabs[0];
+			if (tab.id) {
+				chrome.tabs.sendMessage(
+					tab.id,
+					{
+						color: "#555555",
+					},
+					(msg) => {
+						console.log("result message:", msg);
+					},
+				);
+			}
+		});
+	};
 
-  // return (
-  //   <>
-  //     <ul style={{ minWidth: "700px" }}>
-  //       <li>Current URL: {currentURL}</li>
-  //       <li>Current Time: {new Date().toLocaleTimeString()}</li>
-  //     </ul>
-  //     <button
-  //       onClick={() => setCount(count + 1)}
-  //       style={{ marginRight: "5px" }}
-  //     >
-  //       count up
-  //     </button>
-  //     <button onClick={changeBackground}>change background</button>
-  //   </>
-  // );
-  return (
-    <>
-      {/* Header */}
-      <header>
-        <hgroup>
-          <h1>shadcn-inspired</h1>
-          <p>A class-less example inspired by shadcn components.</p>
-        </hgroup>
-        {/* <button onclick="toggleDarkMode()">Toggle theme</button> */}
-        <button onClick={changeBackground}>Toggle theme</button>
-      </header>
+	return (
+		<>
+			{/* Main */}
+			<main className={"min-w-96 w-max"}>
+				{/* Main Form */}
+				<section id="main-form">
+					<h2 className="text-center">Create a new playlist</h2>
+					<p style={{ whiteSpace: "pre-line" }} className="text-sm">
+						{INSTRUCTION_TEXT}
+					</p>
+					<form>
+						{/* Link Box */}
+						<textarea
+							id="text"
+							name="text"
+							placeholder={LINK_BOX_PLACEHOLDER}
+							rows={10} // Adjust number of visible rows
+							className="w-full font-mono text-sm"
+						/>
 
-      {/* Main */}
-      <main>
-        {/* Preview */}
-        <section id="preview">
-          <h2>Preview</h2>
-          <p>
-            Sed ultricies dolor non ante vulputate hendrerit. Vivamus sit amet
-            suscipit sapien. Nulla iaculis eros a elit pharetra egestas.
-          </p>
-          <form>
-            <input
-              type="text"
-              name="firstname"
-              placeholder="First name"
-              aria-label="First name"
-              required
-            />
-            <input
-              type="email"
-              name="email"
-              placeholder="Email address"
-              aria-label="Email address"
-              autoComplete="email"
-              required
-            />
-            <button type="submit">Subscribe</button>
-            <fieldset>
-              <label htmlFor="terms">
-                <input type="checkbox" role="switch" id="terms" name="terms" />
-                I agree to the
-                <a href="#" onClick={(e) => e.preventDefault()}>
-                  Privacy Policy
-                </a>
-              </label>
-            </fieldset>
-          </form>
-        </section>
-      </main>
-    </>
-  )
+						<button type="submit">Create</button>
+					</form>
+				</section>
+			</main>
+		</>
+	);
 };
 
 const root = createRoot(document.getElementById("root")!);
 
 root.render(
-  <React.StrictMode>
-    <Popup />
-  </React.StrictMode>
+	<React.StrictMode>
+		<Popup />
+	</React.StrictMode>,
 );

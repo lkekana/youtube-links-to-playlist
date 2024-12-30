@@ -32,7 +32,7 @@ module.exports = {
             {
                 test: /\.css$/,
                 use: [
-                    "to-string-loader",
+                    "style-loader",
                     "css-loader",
                     "postcss-loader",
                 ],
