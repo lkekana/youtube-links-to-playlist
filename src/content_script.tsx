@@ -1,9 +1,14 @@
-chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
-  if (msg.color) {
-    console.log("Receive color = " + msg.color);
-    document.body.style.backgroundColor = msg.color;
-    sendResponse("Change color to " + msg.color);
-  } else {
-    sendResponse("Color message is none.");
+export type ListenerResponse = {
+  cookies: string;
+};
+
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  console.log("listener called");
+  console.log("request", request);
+  console.log("sender", sender);
+  if (request.action === "getCookies") {
+    console.log("getting cookies");
+    console.log("document.cookie", document.cookie); 
+    sendResponse({ cookies: document.cookie });
   }
 });
