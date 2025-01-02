@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { createRoot } from "react-dom/client";
 import "./tailwind.css";
-import { PlaylistPrivacy, processLinks } from "./youtube";
+import { type PlaylistParams, PlaylistPrivacy, processLinks } from "./youtube";
 import type { ListenerRequest, ListenerResponse } from "./content_script";
 import ChangeViewButton from "./components/changeviewbutton";
 import Playlist, { type PlaylistInfo } from "./components/playlist";
@@ -71,10 +71,11 @@ const Popup = () => {
 
 		console.log("links", links);
 		await processLinks({
-			videoIDs: links,
+			links: links,
+			ids: [],
 			title: (document.getElementById("title") as HTMLInputElement).value,
 			privacy: privacy,
-		})
+		} as PlaylistParams)
 		.then(async (processedParams) => {
 			console.log("processedParams", processedParams);
 			const tabs: chrome.tabs.Tab[] = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -82,7 +83,7 @@ const Popup = () => {
 			const currentTabId = tabs[0].id;
 			console.log("currentTabId", currentTabId);
 			if (currentTabId) {
-				return new Promise((resolve, reject) => {
+				return new Promise<PlaylistInfo>((resolve, reject) => {
 					chrome.tabs.sendMessage(currentTabId, 
 						{ 
 							action: "createPlaylist",
@@ -91,7 +92,14 @@ const Popup = () => {
 						(response: ListenerResponse) => {
 						console.log("direct message response", response);
 						if (response?.playlistId) {
-							resolve(response.playlistId);
+							resolve({
+								title: processedParams.title,
+								playlistID: response.playlistId,
+								ids: processedParams.ids,
+								privacyStatus: processedParams.privacy,
+								description: "",
+								createdAt: Date.now(),
+							});
 						} else if (response?.error) {
 							reject(response.error);
 						}
@@ -103,8 +111,8 @@ const Popup = () => {
 			}
 			return Promise.reject("No current tab found");
 		})
-		.then((playlistId) => {
-			console.log("playlistId", playlistId);
+		.then((playlist) => {
+			console.log("playlist", playlist);
 			// setCount((prevCount) => prevCount + 1);
 			setProcessing(false);
 			setLinksText("");
@@ -147,7 +155,7 @@ const Popup = () => {
 						type="text"
 						id="title"
 						name="title"
-						placeholder="Choose a playlist title"
+						placeholder="Playlist title"
 						required
 						className="w-full text-sm resize-none m-1"
 					/>
@@ -212,6 +220,7 @@ const Popup = () => {
 
 				{/* Playlists */}
 				<section id={ActiveSection.PLAYLISTS} className={activeView === ActiveSection.PLAYLISTS ? "" : "hidden"}>
+					<h1 className="text-center">▶</h1>
 					<h2 className="text-center">Your Playlists</h2>
 
 					{userPlaylists.map((playlist, index) => (
@@ -222,6 +231,7 @@ const Popup = () => {
 							ids={playlist.ids}
 							privacyStatus={playlist.privacyStatus}
 							description={playlist.description}
+							createdAt={playlist.createdAt}
 						/>
 					))}
 				</section>

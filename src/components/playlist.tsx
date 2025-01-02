@@ -1,19 +1,17 @@
 import React from 'react';
-import { PlaylistPrivacy } from '../youtube';
+import { PlaylistPrivacy, type YouTubeID } from '../youtube';
 
 export type PlaylistInfo = {
     title: string;
     playlistID: string;
-    ids: {
-        type: "video" | "playlist";
-        id: string;
-        playlist_ids?: string[];
-    }[];
+    ids: YouTubeID[];
     privacyStatus: PlaylistPrivacy;
     description: string;
+    focused?: boolean;
+    createdAt: number;
 }
 
-const Playlist: React.FC<PlaylistInfo> = ({ title, playlistID, ids, privacyStatus, description }) => {
+const Playlist: React.FC<PlaylistInfo> = ({ title, playlistID, ids, privacyStatus, description, focused = false }) => {
     let privacyStatusText: string;
     switch (privacyStatus) {
         case PlaylistPrivacy.PUBLIC:
@@ -35,7 +33,7 @@ const Playlist: React.FC<PlaylistInfo> = ({ title, playlistID, ids, privacyStatu
             <h4>
                 <a href={playlistLink}>{title}</a>
             </h4>
-            <details>
+            <details open={focused}>
                 <summary>{ids.length} videos | {privacyStatusText}</summary>
                 <p>
                     <a href={playlistLink}>View Playlist</a>

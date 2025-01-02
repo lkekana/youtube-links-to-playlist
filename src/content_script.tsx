@@ -1,4 +1,4 @@
-import type { PlaylistParams } from "./youtube";
+import { videoIDsOnly, type PlaylistParams } from "./youtube";
 import type { PlaylistCreateResponse } from "./youtube-api";
 
 export type ListenerRequest = {
@@ -45,7 +45,8 @@ chrome.runtime.onMessage.addListener(
 );
 
 const createPlaylist = async (params: PlaylistParams): Promise<string> => {
-	const { videoIDs, title, privacy } = params;
+	const { ids, title, privacy } = params;
+	const videoIDs = videoIDsOnly(ids);
 	console.log("videoIDs", videoIDs);
 	console.log("title", title);
 	console.log("privacy", privacy);
@@ -209,7 +210,9 @@ const getScreenResolution = () => {
 };
 
 const getPlaylistCreateBody = async (params: PlaylistParams) => {
-	const { videoIDs, title, privacy } = params;
+	const { ids, title, privacy } = params;
+	const videoIDs = videoIDsOnly(ids);
+	console.log("videoIDs", videoIDs);
 	return {
 		context: {
 			client: {

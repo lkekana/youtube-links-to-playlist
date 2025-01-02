@@ -8,57 +8,71 @@ export enum PlaylistPrivacy {
 }
 
 export type PlaylistParams = {
-    videoIDs: string[];
-    title: string;
-    privacy: PlaylistPrivacy;
+	links: string[];
+	ids: YouTubeID[];
+	title: string;
+	privacy: PlaylistPrivacy;
+};
+
+export const videoIDsOnly = (ids: YouTubeID[]): string[] => {
+	if (ids.length === 0) {
+		return [];
+	}
+	const result: string[] = [];
+	for (const id of ids) {
+		if (id.type === "video") {
+			result.push(id.id);
+		} else {
+			result.push(...id.playlist_video_ids || []);
+		}
+	}
+	return result;
+};
+
+export type YouTubeID = {
+	type: "video" | "playlist";
+	id: string;
+	playlist_video_ids?: string[];
 };
 
 export const processLinks = async (
-	params : PlaylistParams,
+	params: PlaylistParams,
 ): Promise<PlaylistParams> => {
-	const promises: Promise<string[]>[] = params.videoIDs.map((link) => {
+	const promises: Promise<YouTubeID>[] = params.links.map((link) => {
 		// check if playlist
 		if (link.includes("playlist?list=")) {
 			// get playlist id
 			const playlistID = getPlaylistID(link);
 			if (playlistID !== null) {
 				// fetch playlist
-				return getPlaylistVideoIDs(playlistID);
+				return getPlaylistVideoIDs(playlistID).then((playlist_video_ids) => {
+					return { type: "playlist", id: playlistID, playlist_video_ids } as YouTubeID;
+				});
 			}
 		} else {
 			// get video id
 			const videoID = getVideoID(link);
 			if (videoID !== null) {
-				return Promise.resolve([videoID]);
+				return Promise.resolve({ type: "video", id: videoID });
 			}
 		}
-		return Promise.resolve([]);
+		return Promise.resolve({ type: "video", id: "" });
 	});
 
-	const videoIDs: string[] = await Promise.all(promises).then((results) => {
-		const videoIDs: string[] = [];
-		for (const result of results) {
-			videoIDs.push(...result);
-		}
-		return videoIDs;
-	})
-    .catch((error) => {
-        console.error("error", error);
-        return [];
-    });
+	const ids: YouTubeID[] = await Promise.all(promises);
 
-    console.log("videoIDs", videoIDs);
-    if (videoIDs.length === 0) {
-        return {
+	console.log("ids", ids);
+	if (ids.length === 0) {
+		return {
 			...params,
-			videoIDs: [],
-		}
-    }
+			ids: [],
+		};
+	}
 
-   return {
-        ...params,
-        videoIDs,
-    } as PlaylistParams;
+	return {
+		...params,
+		ids: ids.filter((id) => id.id !== ""),
+	} as PlaylistParams;
 };
 
 const getVideoID = (url: string): string | null => {

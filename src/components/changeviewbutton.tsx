@@ -15,7 +15,7 @@ const ChangeViewButton: React.FC<ChangeViewButtonProps> = ({ onClick, activeSect
         icon = "📂";
     } else if (activeSection === ActiveSection.PLAYLISTS) {
         title = "Create a new playlist";
-        icon = "➕";
+        icon = "🆕";
     }
     return (
         <div className="flex justify-end w-full">
