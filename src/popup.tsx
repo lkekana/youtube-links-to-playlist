@@ -53,6 +53,10 @@ const Popup = () => {
 		setPrivacy(e.target.value as PlaylistPrivacy);
 	};
 
+	const handleOpenPlaylistChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		setShouldOpenPlaylist(e.target.checked);
+	};
+
 	// useEffect(() => {
 	// 	chrome.action.setBadgeText({ text: count.toString() });
 	// }, [count]);
@@ -114,8 +118,12 @@ const Popup = () => {
 		.then((playlist) => {
 			console.log("playlist", playlist);
 			// setCount((prevCount) => prevCount + 1);
-			setProcessing(false);
-			setLinksText("");
+			setUserPlaylists(addNewPlaylist(playlist));
+			if (shouldOpenPlaylist) {
+				openLink(`https://www.youtube.com/playlist?list=${playlist.playlistID}`);
+			}
+			setActiveView(ActiveSection.PLAYLISTS);
+			clearForm();
 		})
 		.catch((error) => {
 			console.error("error", error);
@@ -127,7 +135,18 @@ const Popup = () => {
 	const cancelClick = (e: React.FormEvent<HTMLButtonElement>) => {
 		e.preventDefault();
 		setProcessing(false);
-		setText(backupText);
+		setLinksText(backupLinkText);
+	};
+
+	const clearForm = () => {
+		setProcessing(false);
+		setLinksText("");
+		setBackupLinkText("");
+		setPrivacy(PlaylistPrivacy.PRIVATE);
+	};
+
+	const openLink = (link: string) => {
+		chrome.tabs.create({ url: link });
 	};
 
 	return (
@@ -197,6 +216,19 @@ const Popup = () => {
 							value={linksText}
 							onChange={handleChange}
 						/>
+
+						<label htmlFor="open-playlist">
+							<input
+								type="checkbox"
+								role="switch"
+								id="open-playlist"
+								name="terms"
+								aria-checked={shouldOpenPlaylist}
+								checked={shouldOpenPlaylist}
+								onChange={handleOpenPlaylistChange}
+								/>
+								Open playlist after creation
+						</label>
 
 						{processing ? (
 							<button
