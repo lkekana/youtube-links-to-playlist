@@ -1,7 +1,8 @@
 import React, { useEffect, useState, useRef } from "react";
 import { createRoot } from "react-dom/client";
 import "./tailwind.css";
-import { processLinks } from "./youtube";
+import { PlaylistPrivacy, processLinks } from "./youtube";
+import type { ListenerRequest, ListenerResponse } from "./content_script";
 
 const INSTRUCTION_TEXT = `Enter your YouTube video link(s) or ID(s) here. 1 video per line.
 
@@ -27,10 +28,17 @@ const Popup = () => {
 	const [processing, setProcessing] = useState(false);
 	const [text, setText] = useState("");
 	const [backupText, setBackupText] = useState("");
+	const [privacy, setPrivacy] = useState<PlaylistPrivacy>(
+		PlaylistPrivacy.PRIVATE,
+	);
 
 	const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-        setText(e.target.value);
-    };
+		setText(e.target.value);
+	};
+
+	const handlePrivacyChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+		setPrivacy(e.target.value as PlaylistPrivacy);
+	};
 
 	// useEffect(() => {
 	// 	chrome.action.setBadgeText({ text: count.toString() });
@@ -42,22 +50,57 @@ const Popup = () => {
 	// 	});
 	// }, []);
 
-	const submitClick = (e: React.FormEvent<HTMLButtonElement>) => {
+	const submitClick = async (e: React.FormEvent<HTMLButtonElement>) => {
 		e.preventDefault();
 		setProcessing(true);
 		setBackupText(text);
 		const links = text.split("\n").filter((link) => link.trim() !== "");
 
-        console.log("links", links);
-		processLinks(links, setText);
-		setTimeout(() => {
+		console.log("links", links);
+		await processLinks({
+			videoIDs: links,
+			title: (document.getElementById("title") as HTMLInputElement).value,
+			privacy: privacy,
+		})
+		.then(async (processedParams) => {
+			console.log("processedParams", processedParams);
+			const tabs: chrome.tabs.Tab[] = await chrome.tabs.query({ active: true, currentWindow: true });
+			console.log("tabs", tabs);
+			const currentTabId = tabs[0].id;
+			console.log("currentTabId", currentTabId);
+			if (currentTabId) {
+				return new Promise((resolve, reject) => {
+					chrome.tabs.sendMessage(currentTabId, 
+						{ 
+							action: "createPlaylist",
+							playlistParams: processedParams,
+						} as ListenerRequest,
+						(response: ListenerResponse) => {
+						console.log("direct message response", response);
+						if (response?.playlistId) {
+							resolve(response.playlistId);
+						} else if (response?.error) {
+							reject(response.error);
+						}
+						else {
+							reject("An unspecified error occurred");
+						}
+					});
+				});
+			}
+			return Promise.reject("No current tab found");
+		})
+		.then((playlistId) => {
+			console.log("playlistId", playlistId);
+			// setCount((prevCount) => prevCount + 1);
 			setProcessing(false);
-		}, 4000);
-
-		// chrome.runtime.sendMessage({ type: "createPlaylist", links }, (response) => {
-		// 	console.log("response", response);
-		// 	setProcessing(false);
-		// });
+			setText("");
+		})
+		.catch((error) => {
+			console.error("error", error);
+			setProcessing(false);
+			setText(backupText);
+		});
 	};
 
 	const cancelClick = (e: React.FormEvent<HTMLButtonElement>) => {
