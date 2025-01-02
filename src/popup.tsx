@@ -3,6 +3,8 @@ import { createRoot } from "react-dom/client";
 import "./tailwind.css";
 import { PlaylistPrivacy, processLinks } from "./youtube";
 import type { ListenerRequest, ListenerResponse } from "./content_script";
+import ChangeViewButton from "./components/changeviewbutton";
+import Playlist, { type PlaylistInfo } from "./components/playlist";
 
 const INSTRUCTION_TEXT = `Enter your YouTube video link(s) or ID(s) here. 1 video per line.
 
@@ -22,18 +24,63 @@ lVWwwfcQ5FA
 https://www.youtube.com/playlist?list=PL6o_hmrw5tQgwYP3ra-uoPjCMHUFRoW24
 `;
 
+export enum ActiveSection {
+	FORM = "main-form",
+	PLAYLISTS = "playlists",
+};
+
+const userPlaylists: PlaylistInfo[] = [
+	{
+		title: "Playlist 1",
+		playlistID: "PL6o_hmrw5tQgwYP3ra-uoPjCMHUFRoW24",
+		ids: [
+			{ type: "video", id: "pZwvrxVavnQ" },
+			{ type: "video", id: "Rk2FR8YflrE" },
+			{ type: "video", id: "3xottY-7m3k" },
+		],
+		privacyStatus: PlaylistPrivacy.PRIVATE,
+		description: `Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+		Pellentesque urna diam, tincidunt nec porta sed, auctor id velit.
+		Etiam venenatis nisl ut orci consequat, vitae tempus quam commodo.
+		Nulla non mauris ipsum. Aliquam eu posuere orci. Nulla convallis
+		lectus rutrum quam hendrerit, in facilisis elit sollicitudin.
+		Mauris pulvinar pulvinar mi, dictum tristique elit auctor quis.
+		Maecenas ac ipsum ultrices, porta turpis sit amet, congue turpis.`,
+	},
+	{
+		title: "Playlist 2",
+		playlistID: "PL6o_hmrw5tQgwYP3ra-uoPjCMHUFRoW24",
+		ids: [
+			{ type: "video", id: "pZwvrxVavnQ" },
+			{ type: "video", id: "Rk2FR8YflrE" },
+			{ type: "video", id: "3xottY-7m3k" },
+		],
+		privacyStatus: PlaylistPrivacy.PRIVATE,
+		description: `Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+		Pellentesque urna diam, tincidunt nec porta sed, auctor id velit.
+		Etiam venenatis nisl ut orci consequat, vitae tempus quam commodo.
+		Nulla non mauris ipsum. Aliquam eu posuere orci. Nulla convallis
+		lectus rutrum quam hendrerit, in facilisis elit sollicitudin.
+		Mauris pulvinar pulvinar mi, dictum tristique elit auctor quis.
+		Maecenas ac ipsum ultrices, porta turpis sit amet, congue turpis.`,
+	},
+];
+
 const Popup = () => {
 	// const [count, setCount] = useState(0);
 	// const [currentURL, setCurrentURL] = useState<string>();
 	const [processing, setProcessing] = useState(false);
-	const [text, setText] = useState("");
-	const [backupText, setBackupText] = useState("");
+	const [linksText, setLinksText] = useState("");
+	const [backupLinkText, setBackupLinkText] = useState("");
 	const [privacy, setPrivacy] = useState<PlaylistPrivacy>(
 		PlaylistPrivacy.PRIVATE,
 	);
+	const [activeView, setActiveView] = useState<ActiveSection>(ActiveSection.FORM);
+
+	console.log("activeView", activeView);
 
 	const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-		setText(e.target.value);
+		setLinksText(e.target.value);
 	};
 
 	const handlePrivacyChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -53,8 +100,8 @@ const Popup = () => {
 	const submitClick = async (e: React.FormEvent<HTMLButtonElement>) => {
 		e.preventDefault();
 		setProcessing(true);
-		setBackupText(text);
-		const links = text.split("\n").filter((link) => link.trim() !== "");
+		setBackupLinkText(linksText);
+		const links = linksText.split("\n").filter((link) => link.trim() !== "");
 
 		console.log("links", links);
 		await processLinks({
@@ -94,12 +141,12 @@ const Popup = () => {
 			console.log("playlistId", playlistId);
 			// setCount((prevCount) => prevCount + 1);
 			setProcessing(false);
-			setText("");
+			setLinksText("");
 		})
 		.catch((error) => {
 			console.error("error", error);
 			setProcessing(false);
-			setText(backupText);
+			setLinksText(backupLinkText);
 		});
 	};
 
@@ -111,10 +158,21 @@ const Popup = () => {
 
 	return (
 		<>
+			{/* Header */}
+			<header>
+				<ChangeViewButton
+					onClick={() => {
+						setActiveView(activeView === ActiveSection.FORM ? ActiveSection.PLAYLISTS : ActiveSection.FORM);
+					}}
+					activeSection={activeView}
+					targetSection={activeView === ActiveSection.FORM ? ActiveSection.PLAYLISTS : ActiveSection.FORM}
+				/>
+			</header>
+
 			{/* Main */}
 			<main className={"min-w-96 w-max"}>
 				{/* Main Form */}
-				<section id="main-form">
+				<section id={ActiveSection.FORM} className={activeView === ActiveSection.FORM ? "" : "hidden"}>
 					<h1 className="text-center">▶</h1>
 					<h2 className="text-center">Create a new playlist</h2>
 
@@ -162,7 +220,7 @@ const Popup = () => {
 							className="w-full font-mono text-xs resize-none"
 							readOnly={processing}
 							aria-busy={processing}
-							value={text}
+							value={linksText}
 							onChange={handleChange}
 						/>
 
@@ -184,6 +242,22 @@ const Popup = () => {
 							</button>
 						)}
 					</form>
+				</section>
+
+				{/* Playlists */}
+				<section id={ActiveSection.PLAYLISTS} className={activeView === ActiveSection.PLAYLISTS ? "" : "hidden"}>
+					<h2 className="text-center">Your Playlists</h2>
+
+					{userPlaylists.map((playlist, index) => (
+						<Playlist
+							key={playlist.playlistID}
+							title={playlist.title}
+							playlistID={playlist.playlistID}
+							ids={playlist.ids}
+							privacyStatus={playlist.privacyStatus}
+							description={playlist.description}
+						/>
+					))}
 				</section>
 			</main>
 		</>
