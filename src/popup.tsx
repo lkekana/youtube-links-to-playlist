@@ -5,6 +5,7 @@ import { PlaylistPrivacy, processLinks } from "./youtube";
 import type { ListenerRequest, ListenerResponse } from "./content_script";
 import ChangeViewButton from "./components/changeviewbutton";
 import Playlist, { type PlaylistInfo } from "./components/playlist";
+import { addNewPlaylist, getPlaylists } from "./user_playlists";
 
 const INSTRUCTION_TEXT = `Enter your YouTube video link(s) or ID(s) here. 1 video per line.
 
@@ -29,43 +30,6 @@ export enum ActiveSection {
 	PLAYLISTS = "playlists",
 };
 
-const userPlaylists: PlaylistInfo[] = [
-	{
-		title: "Playlist 1",
-		playlistID: "PL6o_hmrw5tQgwYP3ra-uoPjCMHUFRoW24",
-		ids: [
-			{ type: "video", id: "pZwvrxVavnQ" },
-			{ type: "video", id: "Rk2FR8YflrE" },
-			{ type: "video", id: "3xottY-7m3k" },
-		],
-		privacyStatus: PlaylistPrivacy.PRIVATE,
-		description: `Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-		Pellentesque urna diam, tincidunt nec porta sed, auctor id velit.
-		Etiam venenatis nisl ut orci consequat, vitae tempus quam commodo.
-		Nulla non mauris ipsum. Aliquam eu posuere orci. Nulla convallis
-		lectus rutrum quam hendrerit, in facilisis elit sollicitudin.
-		Mauris pulvinar pulvinar mi, dictum tristique elit auctor quis.
-		Maecenas ac ipsum ultrices, porta turpis sit amet, congue turpis.`,
-	},
-	{
-		title: "Playlist 2",
-		playlistID: "PL6o_hmrw5tQgwYP3ra-uoPjCMHUFRoW24",
-		ids: [
-			{ type: "video", id: "pZwvrxVavnQ" },
-			{ type: "video", id: "Rk2FR8YflrE" },
-			{ type: "video", id: "3xottY-7m3k" },
-		],
-		privacyStatus: PlaylistPrivacy.PRIVATE,
-		description: `Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-		Pellentesque urna diam, tincidunt nec porta sed, auctor id velit.
-		Etiam venenatis nisl ut orci consequat, vitae tempus quam commodo.
-		Nulla non mauris ipsum. Aliquam eu posuere orci. Nulla convallis
-		lectus rutrum quam hendrerit, in facilisis elit sollicitudin.
-		Mauris pulvinar pulvinar mi, dictum tristique elit auctor quis.
-		Maecenas ac ipsum ultrices, porta turpis sit amet, congue turpis.`,
-	},
-];
-
 const Popup = () => {
 	// const [count, setCount] = useState(0);
 	// const [currentURL, setCurrentURL] = useState<string>();
@@ -76,6 +40,8 @@ const Popup = () => {
 		PlaylistPrivacy.PRIVATE,
 	);
 	const [activeView, setActiveView] = useState<ActiveSection>(ActiveSection.FORM);
+	const [userPlaylists, setUserPlaylists] = useState<PlaylistInfo[]>(getPlaylists());
+	const [shouldOpenPlaylist, setShouldOpenPlaylist] = useState(true);
 
 	console.log("activeView", activeView);
 
