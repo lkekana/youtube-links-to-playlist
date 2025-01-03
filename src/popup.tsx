@@ -40,9 +40,10 @@ const Popup = () => {
 		PlaylistPrivacy.PRIVATE,
 	);
 	const [activeView, setActiveView] = useState<ActiveSection>(ActiveSection.FORM);
-	const [userPlaylists, setUserPlaylists] = useState<PlaylistInfo[]>(getPlaylists());
+	const [userPlaylists, setUserPlaylists] = useState<PlaylistInfo[]>([]);
 	const [shouldOpenPlaylist, setShouldOpenPlaylist] = useState(true);
 
+	console.log("userPlaylists", userPlaylists);
 	console.log("activeView", activeView);
 
 	const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -148,6 +149,18 @@ const Popup = () => {
 	const openLink = (link: string) => {
 		chrome.tabs.create({ url: link });
 	};
+
+	useEffect(() => {
+		const fetchPlaylists = async () => {
+		  try {
+			const playlists = await getPlaylists();
+			setUserPlaylists(playlists);
+		  } catch (error) {
+			console.error("Failed to fetch playlists", error);
+		  }
+		};
+
+	}, []);
 
 	return (
 		<>
