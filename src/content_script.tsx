@@ -61,7 +61,7 @@ const createPlaylist = async (params: PlaylistParams): Promise<string> => {
 	console.log(body);
 	return await fetch(
 		"https://www.youtube.com/youtubei/v1/playlist/create?prettyPrint=false",
-		// "https://localhost:3000",
+		// "http://localhost:3000",
 		{
 			headers: {
 				accept: "*/*",
@@ -93,7 +93,6 @@ const createPlaylist = async (params: PlaylistParams): Promise<string> => {
 const getCookie = async (cname: string): Promise<string | undefined> => {
 	const name = `${cname}=`;
 	const cookies = document.cookie;
-	// const cookies = await getCookies();
 	const decodedCookie = decodeURIComponent(cookies);
 	console.log("decodedCookie", decodedCookie);
 	const ca = decodedCookie.split(";");
