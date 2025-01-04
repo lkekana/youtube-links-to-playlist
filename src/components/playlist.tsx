@@ -22,13 +22,16 @@ const Playlist: React.FC<PlaylistInfo> = ({
 	focused = false,
 }) => {
 	const [copied, setCopied] = useState(false);
+	const playlistLink = `https://www.youtube.com/playlist?list=${playlistID}`;
 
-	const handleCopyClick = () => {
-		navigator.clipboard.writeText(
-			`https://www.youtube.com/playlist?list=${playlistID}`,
-		);
+    const handleCopyClick = () => {
+		navigator.clipboard.writeText(playlistLink);
 		setCopied(true);
-		setTimeout(() => setCopied(false), 5000);
+		setTimeout(() => setCopied(false), 2000);
+	};
+
+	const openLink = (link: string) => {
+		chrome.tabs.create({ url: link });
 	};
 
 	let privacyStatusText: string;
@@ -46,7 +49,7 @@ const Playlist: React.FC<PlaylistInfo> = ({
 			privacyStatusText = "🔒 Private";
 			break;
 	}
-	const playlistLink = `https://www.youtube.com/playlist?list=${playlistID}`;
+
 	return (
 		<>
 			<div className="flex items-center justify-between">
@@ -55,7 +58,7 @@ const Playlist: React.FC<PlaylistInfo> = ({
 				</h4>
 				<div className="flex space-x-2">
 					{/* Open In New Tab */}
-					<div title="Open in new tab">
+					<div title="Open in new tab" onClick={() => openLink(playlistLink)}  onKeyUp={(e) => e.preventDefault()} onKeyDown={(e) => e.preventDefault()}>
 						<svg
 							role="img"
 							aria-label="Open in new tab"
@@ -73,7 +76,7 @@ const Playlist: React.FC<PlaylistInfo> = ({
 					</div>
 
 					{/* Clipboard Copy */}
-					<div title="Copy to clipboard">
+					<div title="Copy to clipboard" onClick={handleCopyClick} onKeyUp={(e) => e.preventDefault()} onKeyDown={(e) => e.preventDefault()}>
 						{copied ? (
 							<svg
 								role="img"
