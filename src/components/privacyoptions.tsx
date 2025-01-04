@@ -14,6 +14,7 @@ const PrivacyOptions: React.FC<PrivacyOptionsProps> = ({ privacy, handlePrivacyC
         <select
             id="privacy-select"
             name="privacy-select"
+            title={(anonymousPlaylist || !authorised || !userOnYouTube) ? "Your playlist is unlisted. See note below" : "Select privacy level for playlist"}
             required
             value={privacy}
             onChange={handlePrivacyChange}

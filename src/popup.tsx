@@ -15,6 +15,15 @@ You can also paste a playlist link to add all videos in the playlist
 
 const LINK_BOX_PLACEHOLDER = `Enter your YouTube video link(s) or ID(s) here. 1 video per line.
 
+Examples:
+https://www.youtube.com/watch?v=pZwvrxVavnQ
+https://www.youtube.com/watch?v=Rk2FR8YflrE&t=1s
+https://youtu.be/3xottY-7m3k
+lVWwwfcQ5FA
+`;
+
+const LINK_BOX_PLACEHOLDER_V2 = `Enter your YouTube video link(s) or ID(s) here. 1 video per line.
+
 You can also paste a playlist link to add all videos in the playlist
 (playlist links must be in the form: https://www.youtube.com/playlist?list={playlist_id})
 
@@ -225,6 +234,7 @@ const Popup = () => {
 
 					{/* Text */}
 					<input
+						ref={titleRef}
 						type="text"
 						id="title"
 						name="title"
@@ -251,7 +261,7 @@ const Popup = () => {
 							id="text"
 							name="text"
 							placeholder={LINK_BOX_PLACEHOLDER}
-							rows={10} // Adjust number of visible rows
+							rows={7} // 10 for v2
 							className="w-full font-mono text-xs resize-none"
 							readOnly={processing}
 							aria-busy={processing}
@@ -264,7 +274,7 @@ const Popup = () => {
 								type="checkbox"
 								role="switch"
 								id="open-playlist"
-								name="terms"
+								name="open-playlist"
 								aria-checked={shouldOpenPlaylist}
 								checked={shouldOpenPlaylist}
 								onChange={handleOpenPlaylistChange}
@@ -274,7 +284,7 @@ const Popup = () => {
 
 						{!userOnYouTube ? (
 							<p className="text-xs text-center w-full"  style={{ color: "var(--muted-foreground)" }}>
-								NOTE: You are not on YouTube. Your playlist will be created as unlisted.
+								NOTE: You are not currently on YouTube. Your playlist will be created as unlisted.
 							</p>
 						) :
 						!authorised ? (
