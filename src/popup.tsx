@@ -1,11 +1,12 @@
 import React, { useEffect, useState, useRef } from "react";
 import { createRoot } from "react-dom/client";
 import "./tailwind.css";
-import { type PlaylistParams, PlaylistPrivacy, processLinks } from "./youtube";
+import { getCookie, type PlaylistParams, PlaylistPrivacy, processLinks } from "./youtube";
 import type { ListenerRequest, ListenerResponse } from "./content_script";
 import ChangeViewButton from "./components/changeviewbutton";
 import Playlist, { type PlaylistInfo } from "./components/playlist";
 import { addNewPlaylist, getPlaylists } from "./user_playlists";
+import PrivacyOptions from "./components/privacyoptions";
 
 const INSTRUCTION_TEXT = `Enter your YouTube video link(s) or ID(s) here. 1 video per line.
 
@@ -32,7 +33,8 @@ export enum ActiveSection {
 
 const Popup = () => {
 	// const [count, setCount] = useState(0);
-	// const [currentURL, setCurrentURL] = useState<string>();
+	const titleRef = useRef<HTMLInputElement>(null);
+	const [currentURL, setCurrentURL] = useState<string>();
 	const [processing, setProcessing] = useState(false);
 	const [linksText, setLinksText] = useState("");
 	const [backupLinkText, setBackupLinkText] = useState("");
@@ -42,6 +44,9 @@ const Popup = () => {
 	const [activeView, setActiveView] = useState<ActiveSection>(ActiveSection.FORM);
 	const [userPlaylists, setUserPlaylists] = useState<PlaylistInfo[]>([]);
 	const [shouldOpenPlaylist, setShouldOpenPlaylist] = useState(true);
+	const [anonymousPlaylist, setAnonymousPlaylist] = useState(false);
+	const [authorised, setAuthorised] = useState(false);
+	const [userOnYouTube, setUserOnYouTube] = useState(false);
 
 	console.log("userPlaylists", userPlaylists);
 	console.log("activeView", activeView);
@@ -58,15 +63,13 @@ const Popup = () => {
 		setShouldOpenPlaylist(e.target.checked);
 	};
 
+	const handleAnonymousPlaylistChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		setAnonymousPlaylist(e.target.checked);
+	};
+
 	// useEffect(() => {
 	// 	chrome.action.setBadgeText({ text: count.toString() });
 	// }, [count]);
-
-	// useEffect(() => {
-	// 	chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-	// 		setCurrentURL(tabs[0].url);
-	// 	});
-	// }, []);
 
 	const submitClick = async (e: React.FormEvent<HTMLButtonElement>) => {
 		e.preventDefault();
@@ -119,12 +122,16 @@ const Popup = () => {
 		.then((playlist) => {
 			console.log("playlist", playlist);
 			// setCount((prevCount) => prevCount + 1);
-			setUserPlaylists(addNewPlaylist(playlist));
-			if (shouldOpenPlaylist) {
-				openLink(`https://www.youtube.com/playlist?list=${playlist.playlistID}`);
-			}
-			setActiveView(ActiveSection.PLAYLISTS);
-			clearForm();
+			addNewPlaylist(playlist)
+			.then((playlists) => {
+				setUserPlaylists(playlists);
+				console.log("userPlaylists (pre-open)", userPlaylists);
+				if (shouldOpenPlaylist) {
+					openLink(`https://www.youtube.com/playlist?list=${playlist.playlistID}`);
+				}
+				setActiveView(ActiveSection.PLAYLISTS);
+				clearForm();
+			});
 		})
 		.catch((error) => {
 			console.error("error", error);
@@ -160,6 +167,40 @@ const Popup = () => {
 		  }
 		};
 
+		const checkAuth = async () => {
+			const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+			const url = tab?.url;
+			if (!url) return;
+			setCurrentURL(url);
+			console.log("currentURL", url);
+	
+			// if currentURL is a YouTube URL (match with regex)
+			// if *.youtube.com/* or *.youtube.com
+			// AND if not *.youtube-nocookie.com/*
+			const isOnYouTube =
+				/^(https?:\/\/)?(www\.)?youtube\.com\/?/.test(url) &&
+				!/^(https?:\/\/)?(www\.)?youtube-nocookie\.com\/.*/.test(url);
+			setUserOnYouTube(isOnYouTube);
+			console.log("isOnYouTube", isOnYouTube);
+	
+			if (isOnYouTube) {
+				// Check cookies if on YouTube
+				const SAPISID = await getCookie("SAPISID");
+				if (SAPISID) {
+					setAuthorised(true);
+				} else {
+					setAuthorised(false);
+					setAnonymousPlaylist(true);
+				}
+			} else {
+				setAuthorised(false);
+				setAnonymousPlaylist(true);
+			}
+		};
+
+		fetchPlaylists();
+		checkAuth();
+		titleRef.current?.focus();
 	}, []);
 
 	return (
@@ -242,6 +283,32 @@ const Popup = () => {
 								/>
 								Open playlist after creation
 						</label>
+
+						{!userOnYouTube ? (
+							<p className="text-xs text-center w-full"  style={{ color: "var(--muted-foreground)" }}>
+								NOTE: You are not on YouTube. Your playlist will be created as unlisted.
+							</p>
+						) :
+						!authorised ? (
+							<p className="text-xs text-center w-full"  style={{ color: "var(--muted-foreground)" }}>
+								NOTE: You are not signed in to YouTube. Your playlist will be created as unlisted.
+							</p>
+						) :
+						( <label htmlFor="anonymous-playlist">
+							<input
+								type="checkbox"
+								role="switch"
+								id="anonymous-playlist"
+								name="anonymous-playlist"
+								aria-checked={anonymousPlaylist}
+								checked={anonymousPlaylist}
+								onChange={handleAnonymousPlaylistChange}
+								disabled={!userOnYouTube || !authorised}
+								/>
+								Create anonymously (not associated with your YouTube account)
+						</label> )}
+
+						{/* Buttons */}
 
 						{processing ? (
 							<button

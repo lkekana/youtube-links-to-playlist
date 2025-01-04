@@ -98,3 +98,48 @@ const getPlaylistVideoIDs = async (playlistID: string): Promise<string[]> => {
 	// return data.items.map((item: any) => item.contentDetails.videoId);
 	return [];
 };
+
+export const getCookie = async (cname: string): Promise<string | undefined> => {
+	const name = `${cname}=`;
+	const cookies = await getCookies();
+	const decodedCookie = decodeURIComponent(cookies);
+	console.log("decodedCookie", decodedCookie);
+	const ca = decodedCookie.split(";");
+	for (let i = 0; i < ca.length; i++) {
+		let c = ca[i];
+		while (c.charAt(0) === " ") {
+			c = c.substring(1);
+		}
+		if (c.indexOf(name) === 0) {
+			return c.substring(name.length, c.length);
+		}
+	}
+	return undefined;
+};
+
+const getCookies = async (): Promise<string> => {
+	const tabs: chrome.tabs.Tab[] = await chrome.tabs.query({
+		active: true,
+		currentWindow: true,
+	});
+	console.log("tabs", tabs);
+	const currentTabId = tabs[0].id;
+	console.log("currentTabId", currentTabId);
+	if (currentTabId) {
+		return new Promise((resolve, reject) => {
+			chrome.tabs.sendMessage(
+				currentTabId,
+				{ action: "getCookies" },
+				(response: ListenerResponse) => {
+					console.log("response", response);
+					if (response?.cookies) {
+						resolve(response.cookies);
+					} else {
+						reject("No cookies found");
+					}
+				},
+			);
+		});
+	}
+	return "";
+};
