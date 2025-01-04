@@ -233,25 +233,13 @@ const Popup = () => {
 						className="w-full text-sm resize-none m-1"
 					/>
 
-					{/* Select */}
-					<select
-						id="privacy-select"
-						name="privacy-select"
-						required
-						value={privacy}
-						onChange={handlePrivacyChange}
-						className="w-full m-1"
-					>
-						<option value={PlaylistPrivacy.PUBLIC}>
-						🌎 Public: Anyone can search for and view
-						</option>
-						<option value={PlaylistPrivacy.UNLISTED}>
-						🔗 Unlisted: Anyone with the link can view
-						</option>
-						<option value={PlaylistPrivacy.PRIVATE}>
-						🔒 Private: Only you can view
-						</option>
-					</select>
+					<PrivacyOptions 
+						privacy={privacy} 
+						handlePrivacyChange={handlePrivacyChange} 
+						anonymousPlaylist={anonymousPlaylist} 
+						authorised={authorised}
+						userOnYouTube={userOnYouTube}
+					/>
 
 					{/* Instructions */}
 					{/* <p style={{ whiteSpace: "pre-line" }} className="text-sm">

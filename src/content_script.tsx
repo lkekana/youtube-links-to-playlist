@@ -109,33 +109,6 @@ const getCookie = async (cname: string): Promise<string | undefined> => {
 	return undefined;
 };
 
-const getCookies = async (): Promise<string> => {
-	const tabs: chrome.tabs.Tab[] = await chrome.tabs.query({
-		active: true,
-		currentWindow: true,
-	});
-	console.log("tabs", tabs);
-	const currentTabId = tabs[0].id;
-	console.log("currentTabId", currentTabId);
-	if (currentTabId) {
-		return new Promise((resolve, reject) => {
-			chrome.tabs.sendMessage(
-				currentTabId,
-				{ action: "getCookies" },
-				(response: ListenerResponse) => {
-					console.log("response", response);
-					if (response?.cookies) {
-						resolve(response.cookies);
-					} else {
-						reject("No cookies found");
-					}
-				},
-			);
-		});
-	}
-	return "";
-};
-
 const padStart = (
 	str: string,
 	targetLength: number,
