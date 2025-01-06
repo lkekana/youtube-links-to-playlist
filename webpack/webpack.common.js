@@ -44,7 +44,10 @@ module.exports = {
     },
     plugins: [
         new CopyPlugin({
-            patterns: [{ from: ".", to: "../", context: "public" }],
+            patterns: [
+                { from: ".", to: "../", context: "public" },
+                { from: "public/icons", to: "../icons" }, // Add this line to copy the icons folder
+            ],
             options: {},
         }),
     ],
