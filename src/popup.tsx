@@ -341,17 +341,23 @@ const Popup = () => {
 					<h1 className="text-center">▶</h1>
 					<h2 className="text-center">Your Playlists</h2>
 
-					{userPlaylists.map((playlist, index) => (
-						<Playlist
-							key={playlist.playlistID}
-							title={playlist.title}
-							playlistID={playlist.playlistID}
-							ids={playlist.ids}
-							privacyStatus={playlist.privacyStatus}
-							description={playlist.description}
-							createdAt={playlist.createdAt}
-						/>
-					))}
+					{userPlaylists.length === 0 ? (
+						<p className="text-xs text-center w-full" style={{ color: "var(--muted-foreground)" }}>
+							Make a new playlist to get started!
+						</p>
+					) : (
+						userPlaylists.map((playlist) => (
+							<Playlist
+								key={playlist.playlistID}
+								title={playlist.title}
+								playlistID={playlist.playlistID}
+								ids={playlist.ids}
+								privacyStatus={playlist.privacyStatus}
+								description={playlist.description}
+								createdAt={playlist.createdAt}
+							/>
+						))
+					)}
 				</section>
 			</main>
 		</>
