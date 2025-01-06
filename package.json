@@ -1,7 +1,7 @@
 {
-  "name": "chrome-extension-typescript-starter",
+  "name": "youtube-playlist-maker",
   "version": "1.0.0",
-  "description": "chrome-extension-typescript-starter",
+  "description": "A simple Chrome extension to create playlists from YouTube videos.",
   "main": "index.js",
   "scripts": {
     "watch": "webpack --config webpack/webpack.dev.js --watch",
@@ -14,8 +14,13 @@
   "license": "GPL-3.0-only",
   "repository": {
     "type": "git",
-    "url": "https://github.com/chibat/chrome-extension-typescript-starter.git"
+    "url": "https://github.com/lkekana/youtube-links-to-playlist.git"
   },
+  "keywords": [
+    "chrome-extension",
+    "youtube",
+    "playlist"
+  ],
   "dependencies": {
     "autoprefixer": "^10.4.20",
     "date-fns": "^4.1.0",
