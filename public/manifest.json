@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
 
-  "name": "Chrome Extension TypeScript Starter",
-  "description": "Chrome Extension, TypeScript, Visual Studio Code",
+  "name": "YouTube Playlist Maker",
+  "description": "Create YouTube playlists using a list of video URLs",
   "version": "1.0",
 
   "options_ui": {
@@ -16,8 +16,16 @@
 
   "content_scripts": [
       {
-          "matches": ["<all_urls>"],
-          "js": ["js/vendor.js", "js/content_script.js"]
+        "js": ["js/vendor.js", "js/content_script.js", "js/youtube.js"],
+        "matches": [
+            "https://*.youtube.com/*",
+            "https://www.youtube-nocookie.com/embed/*"
+        ],
+        "exclude_matches": [
+          "https://accounts.youtube.com/RotateCookiesPage*"
+      ],
+        "all_frames": true,
+        "run_at": "document_start"
       }
   ],
 
@@ -25,9 +33,7 @@
     "service_worker": "js/background.js"
   },
 
-  "permissions": [
-    "storage"
-  ],
+  "permissions": ["activeTab", "cookies", "storage"],
 
   "host_permissions": [
     "<all_urls>"
