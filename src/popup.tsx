@@ -7,6 +7,7 @@ import ChangeViewButton from "./components/changeviewbutton";
 import Playlist, { type PlaylistInfo } from "./components/playlist";
 import { addNewPlaylist, getPlaylists } from "./user_playlists";
 import PrivacyOptions from "./components/privacyoptions";
+import AuthStateBadge from "./components/authstatebadge";
 
 const INSTRUCTION_TEXT = `Enter your YouTube video link(s) or ID(s) here. 1 video per line.
 
@@ -39,6 +40,8 @@ export enum ActiveSection {
 	FORM = "main-form",
 	PLAYLISTS = "playlists",
 };
+
+const DISABLED_YELLOW = "#fde047";
 
 const Popup = () => {
 	// const [count, setCount] = useState(0);
@@ -216,13 +219,16 @@ const Popup = () => {
 		<>
 			{/* Header */}
 			<header>
-				<ChangeViewButton
-					onClick={() => {
-						setActiveView(activeView === ActiveSection.FORM ? ActiveSection.PLAYLISTS : ActiveSection.FORM);
-					}}
-					activeSection={activeView}
-					targetSection={activeView === ActiveSection.FORM ? ActiveSection.PLAYLISTS : ActiveSection.FORM}
-				/>
+				<div className="flex justify-between items-center">
+					{/* <AuthStateBadge authenticated /> */}
+					<ChangeViewButton
+						onClick={() => {
+							setActiveView(activeView === ActiveSection.FORM ? ActiveSection.PLAYLISTS : ActiveSection.FORM);
+						}}
+						activeSection={activeView}
+						targetSection={activeView === ActiveSection.FORM ? ActiveSection.PLAYLISTS : ActiveSection.FORM}
+					/>
+				</div>
 			</header>
 
 			{/* Main */}
@@ -238,9 +244,11 @@ const Popup = () => {
 						type="text"
 						id="title"
 						name="title"
-						placeholder="Playlist title"
+						placeholder={`${anonymousPlaylist ? "(YouTube will generate a generic name for anonymous playlists)" : "Playlist Title"}`}
 						required
-						className="w-full text-sm resize-none m-1"
+						className={`w-full text-sm resize-none m-1 ${anonymousPlaylist ? "cursor-not-allowed" : ""}`}
+						disabled={processing || anonymousPlaylist}
+						// style={(processing || anonymousPlaylist) ? { border: `1px solid ${DISABLED_YELLOW}`, color: DISABLED_YELLOW } : { border: "1px solid var(--border)", color: "var(--foreground)" }}
 					/>
 
 					<PrivacyOptions 
@@ -283,13 +291,13 @@ const Popup = () => {
 						</label>
 
 						{!userOnYouTube ? (
-							<p className="text-xs text-center w-full"  style={{ color: "var(--muted-foreground)" }}>
-								NOTE: You are not currently on YouTube. Your playlist will be created as unlisted.
+							<p className="text-xs text-center w-full text-red-600" >
+								NOTE: You are not currently on YouTube. Your playlist will be created as unlisted & anonymous.
 							</p>
 						) :
 						!authorised ? (
-							<p className="text-xs text-center w-full"  style={{ color: "var(--muted-foreground)" }}>
-								NOTE: You are not signed in to YouTube. Your playlist will be created as unlisted.
+							<p className="text-xs text-center w-full text-red-600" >
+								NOTE: You are not signed in to YouTube. Your playlist will be created as unlisted & anonymous.
 							</p>
 						) :
 						( <label htmlFor="anonymous-playlist">

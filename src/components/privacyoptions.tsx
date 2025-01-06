@@ -10,18 +10,19 @@ interface PrivacyOptionsProps {
 }
 
 const PrivacyOptions: React.FC<PrivacyOptionsProps> = ({ privacy, handlePrivacyChange, anonymousPlaylist, authorised, userOnYouTube }) => {
+    const unlistedOnly = anonymousPlaylist || !authorised || !userOnYouTube;
     return (
         <select
             id="privacy-select"
             name="privacy-select"
-            title={(anonymousPlaylist || !authorised || !userOnYouTube) ? "Your playlist is unlisted. See note below" : "Select privacy level for playlist"}
+            title={unlistedOnly ? "Your playlist is unlisted. See note below" : "Select privacy level for playlist"}
             required
             value={privacy}
             onChange={handlePrivacyChange}
-            className="w-full m-1"
+            className={`w-full m-1 ${unlistedOnly ? "cursor-not-allowed" : ""}`}
             disabled={!authorised || !userOnYouTube}
         >
-            {anonymousPlaylist || !authorised || !userOnYouTube ? (
+            {unlistedOnly ? (
                 <option value={PlaylistPrivacy.UNLISTED}>
                     🔗 Unlisted: Anyone with the link can view
                 </option>
