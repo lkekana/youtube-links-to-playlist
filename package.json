@@ -10,8 +10,8 @@
     "test": "npx jest",
     "style": "biome format --write \"**/*.{ts,tsx}\""
   },
-  "author": "",
-  "license": "MIT",
+  "author": "Lesedi Kekana",
+  "license": "GPL-3.0-only",
   "repository": {
     "type": "git",
     "url": "https://github.com/chibat/chrome-extension-typescript-starter.git"
