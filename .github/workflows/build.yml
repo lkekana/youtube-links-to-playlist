@@ -37,7 +37,7 @@ jobs:
       run: pnpm test
 
     - name: Build extension
-      run: pnpm run build --if-present
+      run: pnpm run build
 
     - name: Zip extension
       run: zip -r ypm-${{ github.sha }}.zip dist
