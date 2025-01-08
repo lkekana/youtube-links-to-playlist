@@ -1,3 +1,24 @@
 .disabled-input::placeholder {
     color: #facc15;
 }
+.my-dark-mode {
+    --background: #020617;
+    --foreground: #f8fafc;
+    --muted: #27272a;
+    --muted-foreground: #94a3b8;
+    --popover: #020617;
+    --popover-foreground: #f8fafc;
+    --card: #020617;
+    --card-foreground: #f8fafc;
+    --border: #27272a;
+    --input: #27272a;
+    --primary: #1e293b;
+    --primary-foreground: #f8fafc;
+    --secondary: #27272a;
+    --secondary-foreground: #f8fafc;
+    --accent: #27272a;
+    --accent-foreground: #f8fafc;
+    --destructive: #7f1d1d;
+    --destructive-foreground: #f8fafc;
+    --ring: #27272a;
+  }
