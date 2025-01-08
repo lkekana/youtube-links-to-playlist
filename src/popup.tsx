@@ -169,6 +169,43 @@ const Popup = () => {
 		chrome.tabs.create({ url: link });
 	};
 
+	const checkAuth = async () => {
+		const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+		const url = tab?.url;
+		if (!url) return;
+		setCurrentURL(url);
+		console.log("currentURL", url);
+
+		console.log("userOnYouTube", userOnYouTube);
+		let isOnYouTube = userOnYouTube;
+		if (!isOnYouTube) {
+			// if currentURL is a YouTube URL (match with regex)
+			// if *.youtube.com/* or *.youtube.com
+			// AND if not *.youtube-nocookie.com/*
+			isOnYouTube =
+			/^(https?:\/\/)?(www\.)?youtube\.com\/?/.test(url) &&
+			!/^(https?:\/\/)?(www\.)?youtube-nocookie\.com\/.*/.test(url);
+			if (isOnYouTube) setUserOnYouTube(isOnYouTube);
+		}
+		console.log("isOnYouTube", isOnYouTube);
+		console.log("authorised", authorised);
+		if (!isOnYouTube) return;
+		if (authorised) return;
+
+		if (isOnYouTube) {
+			// Check cookies if on YouTube
+			const SAPISID = await getCookie("SAPISID");
+			console.log("SAPISID", SAPISID);
+			if (SAPISID !== null) {
+				setAuthorised(true);
+				console.log("authorised set to (true): ", authorised);
+				return;
+			}
+		}
+		setAuthorised(false);
+		setAnonymousPlaylist(true);
+	};
+
 	useEffect(() => {
 		const fetchPlaylists = async () => {
 		  try {
@@ -179,40 +216,17 @@ const Popup = () => {
 		  }
 		};
 
-		const checkAuth = async () => {
-			const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-			const url = tab?.url;
-			if (!url) return;
-			setCurrentURL(url);
-			console.log("currentURL", url);
-	
-			// if currentURL is a YouTube URL (match with regex)
-			// if *.youtube.com/* or *.youtube.com
-			// AND if not *.youtube-nocookie.com/*
-			const isOnYouTube =
-				/^(https?:\/\/)?(www\.)?youtube\.com\/?/.test(url) &&
-				!/^(https?:\/\/)?(www\.)?youtube-nocookie\.com\/.*/.test(url);
-			setUserOnYouTube(isOnYouTube);
-			console.log("isOnYouTube", isOnYouTube);
-	
-			if (isOnYouTube) {
-				// Check cookies if on YouTube
-				const SAPISID = await getCookie("SAPISID");
-				if (SAPISID) {
-					setAuthorised(true);
-				} else {
-					setAuthorised(false);
-					setAnonymousPlaylist(true);
-				}
-			} else {
-				setAuthorised(false);
-				setAnonymousPlaylist(true);
-			}
-		};
-
 		fetchPlaylists();
 		checkAuth();
 		titleRef.current?.focus();
+
+		const interval = setInterval(() => {
+            if (!authorised || !userOnYouTube) {
+                checkAuth();
+            }
+        }, 5000); // Check every 5 seconds
+
+        return () => clearInterval(interval); // Cleanup interval on component unmount
 	}, []);
 
 	return (
