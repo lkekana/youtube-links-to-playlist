@@ -10,6 +10,7 @@ export type ListenerResponse = {
 	cookies?: string;
 	error?: string;
 	playlistId?: string;
+	scriptLoaded?: boolean;
 };
 
 chrome.runtime.onMessage.addListener(
@@ -21,7 +22,10 @@ chrome.runtime.onMessage.addListener(
 		console.log("listener called");
 		console.log("request", request);
 		console.log("sender", sender);
-		if (request.action === "getCookies") {
+		if (request.action === "ping") {
+			sendResponse({ scriptLoaded: true });
+		}
+		else if (request.action === "getCookies") {
 			console.log("getting cookies");
 			console.log("document.cookie", document.cookie);
 			sendResponse({ cookies: document.cookie });
