@@ -99,7 +99,7 @@ const getPlaylistVideoIDs = async (playlistID: string): Promise<string[]> => {
 	return [];
 };
 
-export const getCookie = async (cname: string): Promise<string | undefined> => {
+export const getCookie = async (cname: string): Promise<string | null> => {
 	const name = `${cname}=`;
 	const cookies = await getCookies();
 	const decodedCookie = decodeURIComponent(cookies);
@@ -114,7 +114,7 @@ export const getCookie = async (cname: string): Promise<string | undefined> => {
 			return c.substring(name.length, c.length);
 		}
 	}
-	return undefined;
+	return null;
 };
 
 const getCookies = async (): Promise<string> => {

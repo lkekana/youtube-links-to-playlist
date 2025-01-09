@@ -56,7 +56,6 @@ const ChangeViewButton: React.FC<ChangeViewButtonProps> = ({
 		);
 	}
 	return (
-		<div className="flex justify-end w-full">
 			<button
 				type="button"
 				title={title}
@@ -66,7 +65,6 @@ const ChangeViewButton: React.FC<ChangeViewButtonProps> = ({
 			>
 				{icon}
 			</button>
-		</div>
 	);
 };
 

@@ -8,6 +8,8 @@ import Playlist, { type PlaylistInfo } from "./components/playlist";
 import { addNewPlaylist, getPlaylists } from "./user_playlists";
 import PrivacyOptions from "./components/privacyoptions";
 import AuthStateBadge from "./components/authstatebadge";
+import { useTernaryDarkMode } from 'usehooks-ts';
+import ToggleDarkModeButton from "./components/toggledarkmodebutton";
 
 const INSTRUCTION_TEXT = `Enter your YouTube video link(s) or ID(s) here. 1 video per line.
 
@@ -42,6 +44,7 @@ export enum ActiveSection {
 };
 
 const DISABLED_YELLOW = "#fde047";
+const DARK_MODE_CLASS = "my-dark-mode";
 
 const Popup = () => {
 	// const [count, setCount] = useState(0);
@@ -59,6 +62,13 @@ const Popup = () => {
 	const [anonymousPlaylist, setAnonymousPlaylist] = useState(false);
 	const [authorised, setAuthorised] = useState(false);
 	const [userOnYouTube, setUserOnYouTube] = useState(false);
+
+	const {
+		isDarkMode,
+		ternaryDarkMode,
+		setTernaryDarkMode,
+		toggleTernaryDarkMode,
+	  } = useTernaryDarkMode();
 
 	console.log("userPlaylists", userPlaylists);
 	console.log("activeView", activeView);
@@ -207,6 +217,17 @@ const Popup = () => {
 	};
 
 	useEffect(() => {
+		// Apply the dark mode class based on the ternaryDarkMode state
+		if (isDarkMode) {
+		  document.body.classList.add(DARK_MODE_CLASS);
+		} else {
+		  document.body.classList.remove(DARK_MODE_CLASS);
+		}
+	}, [isDarkMode]);
+
+	useEffect(() => {
+		if (!isDarkMode) document.body.classList.remove(DARK_MODE_CLASS);
+
 		const fetchPlaylists = async () => {
 		  try {
 			const playlists = await getPlaylists();
@@ -233,8 +254,9 @@ const Popup = () => {
 		<>
 			{/* Header */}
 			<header>
-				<div className="flex justify-between items-center">
+			<div className="flex justify-end items-center space-x-2">
 					{/* <AuthStateBadge authenticated /> */}
+					<ToggleDarkModeButton />
 					<ChangeViewButton
 						onClick={() => {
 							setActiveView(activeView === ActiveSection.FORM ? ActiveSection.PLAYLISTS : ActiveSection.FORM);
