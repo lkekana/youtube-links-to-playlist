@@ -2,17 +2,18 @@
 
 ![build](https://github.com/lkekana/youtube-links-to-playlist/workflows/build/badge.svg)
 
+_The main popup shown in both light and dark mode_
 <p align="center">
   <img src="assets/screenshot1.png" alt="Screenshot 1" style="display:inline-block; width:49%;"/>
   <img src="assets/screenshot2.png" alt="Screenshot 2" style="display:inline-block; width:49%;"/>
 </p>
 
-_The main popup shown in both light and dark mode_
 
-<img src="assets/screenshot3.png" alt="Screenshot 3" style="zoom:67%;" /> 
 _The additional 'playlists view' for showing playlists created by the extension_
+<img src="assets/screenshot3.png" alt="Screenshot 3" style="zoom:67%;" /> 
 
 ## Introduction
+
 YouTube Playlist Maker is a Chrome extension designed to simplify the process of creating YouTube playlists from a list of video URLs.
 
 ## Why?
