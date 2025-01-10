@@ -36,9 +36,9 @@ const ToggleDarkModeButton: React.FC = () => {
 				className={SVG_SIZE}
 			>
 				<path
-					fill-rule="evenodd"
+					fillRule="evenodd"
 					d="M2.25 5.25a3 3 0 0 1 3-3h13.5a3 3 0 0 1 3 3V15a3 3 0 0 1-3 3h-3v.257c0 .597.237 1.17.659 1.591l.621.622a.75.75 0 0 1-.53 1.28h-9a.75.75 0 0 1-.53-1.28l.621-.622a2.25 2.25 0 0 0 .659-1.59V18h-3a3 3 0 0 1-3-3V5.25Zm1.5 0v7.5a1.5 1.5 0 0 0 1.5 1.5h13.5a1.5 1.5 0 0 0 1.5-1.5v-7.5a1.5 1.5 0 0 0-1.5-1.5H5.25a1.5 1.5 0 0 0-1.5 1.5Z"
-					clip-rule="evenodd"
+					clipRule="evenodd"
 				/>
 			</svg>
 		);
@@ -54,9 +54,9 @@ const ToggleDarkModeButton: React.FC = () => {
 				className={SVG_SIZE}
 			>
 				<path
-					fill-rule="evenodd"
+					fillRule="evenodd"
 					d="M9.528 1.718a.75.75 0 0 1 .162.819A8.97 8.97 0 0 0 9 6a9 9 0 0 0 9 9 8.97 8.97 0 0 0 3.463-.69.75.75 0 0 1 .981.98 10.503 10.503 0 0 1-9.694 6.46c-5.799 0-10.5-4.7-10.5-10.5 0-4.368 2.667-8.112 6.46-9.694a.75.75 0 0 1 .818.162Z"
-					clip-rule="evenodd"
+					clipRule="evenodd"
 				/>
 			</svg>
 		);

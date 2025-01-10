@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import { createRoot } from "react-dom/client";
 import "./tailwind.css";
 import {
@@ -194,7 +194,7 @@ const Popup = () => {
 		chrome.tabs.create({ url: link });
 	};
 
-	const checkAuth = async () => {
+	const checkAuth = useCallback(async () => {
 		const [tab] = await chrome.tabs.query({
 			active: true,
 			currentWindow: true,
@@ -226,13 +226,14 @@ const Popup = () => {
 			console.log("SAPISID", SAPISID);
 			if (SAPISID !== null) {
 				setAuthorised(true);
+				setContentScriptLoaded(true);
 				console.log("authorised set to (true): ", authorised);
 				return;
 			}
 		}
 		setAuthorised(false);
 		setAnonymousPlaylist(true);
-	};
+	}, [userOnYouTube, authorised]);
 
 	useEffect(() => {
 		// Apply the dark mode class based on the ternaryDarkMode state
@@ -243,6 +244,7 @@ const Popup = () => {
 		}
 	}, [isDarkMode]);
 
+	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 	useEffect(() => {
 		if (!isDarkMode) document.body.classList.remove(DARK_MODE_CLASS);
 
@@ -269,12 +271,12 @@ const Popup = () => {
 						);
 					},
 				);
-
+				console.log("pingListener result", result);
 				if (result.scriptLoaded) {
 					setContentScriptLoaded(true);
 				}
 			} catch (error) {
-				console.error(error);
+				console.error("pingListener error", error);
 				setContentScriptLoaded(false);
 			}
 		};
@@ -330,7 +332,8 @@ const Popup = () => {
 			{/* Main */}
 			<main className={"min-w-96 w-max"}>
 				{/* Reload Message */}
-				{!contentScriptLoaded && (
+				{/*
+				!contentScriptLoaded && (
 					<>
 						<h1 className="text-center">▶</h1>
 						<h2 className="text-center">YouTube Playlist Maker</h2>
@@ -338,120 +341,128 @@ const Popup = () => {
 							Please reload the page to use this extension.
 						</p>
 					</>
-				)}
+				)
+				*/}
 
 				{/* Main Form */}
-				{contentScriptLoaded && activeView === ActiveSection.FORM && (
+				{activeView === ActiveSection.FORM && (
 					<section id={ActiveSection.FORM}>
 						<h1 className="text-center">▶</h1>
 						<h2 className="text-center">Create a new playlist</h2>
 
-						{/* Text */}
-						<input
-							ref={titleRef}
-							type="text"
-							id="title"
-							name="title"
-							placeholder={`${anonymousPlaylist ? "(YouTube will generate a generic name for anonymous playlists)" : "Playlist Title"}`}
-							required
-							className={`w-full text-sm resize-none m-1 ${anonymousPlaylist ? "cursor-not-allowed" : ""}`}
-							disabled={processing || anonymousPlaylist}
-							// style={(processing || anonymousPlaylist) ? { border: `1px solid ${DISABLED_YELLOW}`, color: DISABLED_YELLOW } : { border: "1px solid var(--border)", color: "var(--foreground)" }}
-						/>
-
-						<PrivacyOptions
-							privacy={privacy}
-							handlePrivacyChange={handlePrivacyChange}
-							anonymousPlaylist={anonymousPlaylist}
-							authorised={authorised}
-							userOnYouTube={userOnYouTube}
-						/>
-
-						{/* Instructions */}
-						{/* <p style={{ whiteSpace: "pre-line" }} className="text-sm">
-							{INSTRUCTION_TEXT}
-						</p> */}
-						<form className="m-1">
-							{/* Link Box */}
-							<textarea
-								id="text"
-								name="text"
-								placeholder={LINK_BOX_PLACEHOLDER}
-								rows={7} // 10 for v2
-								className="w-full font-mono text-xs resize-none"
-								readOnly={processing}
-								aria-busy={processing}
-								value={linksText}
-								onChange={handleChange}
-							/>
-
-							<label htmlFor="open-playlist">
+						{userOnYouTube && !contentScriptLoaded ? (
+							<p className="text-xs text-center w-full text-red-600">
+								Please reload the page to use this extension.
+							</p>
+						) : (
+							<>
+								{/* Text */}
 								<input
-									type="checkbox"
-									role="switch"
-									id="open-playlist"
-									name="open-playlist"
-									aria-checked={shouldOpenPlaylist}
-									checked={shouldOpenPlaylist}
-									onChange={handleOpenPlaylistChange}
+									ref={titleRef}
+									type="text"
+									id="title"
+									name="title"
+									placeholder={`${anonymousPlaylist ? "(YouTube will generate a generic name for anonymous playlists)" : "Playlist Title"}`}
+									required
+									className={`w-full text-sm resize-none m-1 ${anonymousPlaylist ? "cursor-not-allowed" : ""}`}
+									disabled={processing || anonymousPlaylist}
+									// style={(processing || anonymousPlaylist) ? { border: `1px solid ${DISABLED_YELLOW}`, color: DISABLED_YELLOW } : { border: "1px solid var(--border)", color: "var(--foreground)" }}
 								/>
-								Open playlist after creation
-							</label>
 
-							{!userOnYouTube ? (
-								<p className="text-xs text-center w-full text-red-600">
-									NOTE: You are not currently on YouTube. Your playlist will be
-									created as unlisted & anonymous.
-								</p>
-							) : !authorised ? (
-								<p className="text-xs text-center w-full text-red-600">
-									NOTE: You are not signed in to YouTube. Your playlist will be
-									created as unlisted & anonymous.
-								</p>
-							) : (
-								<label htmlFor="anonymous-playlist">
-									<input
-										type="checkbox"
-										role="switch"
-										id="anonymous-playlist"
-										name="anonymous-playlist"
-										aria-checked={anonymousPlaylist}
-										checked={anonymousPlaylist}
-										onChange={handleAnonymousPlaylistChange}
-										disabled={!userOnYouTube || !authorised}
+								<PrivacyOptions
+									privacy={privacy}
+									handlePrivacyChange={handlePrivacyChange}
+									anonymousPlaylist={anonymousPlaylist}
+									authorised={authorised}
+									userOnYouTube={userOnYouTube}
+								/>
+
+								{/* Instructions */}
+								{/* <p style={{ whiteSpace: "pre-line" }} className="text-sm">
+								{INSTRUCTION_TEXT}
+							</p> */}
+								<form className="m-1">
+									{/* Link Box */}
+									<textarea
+										id="text"
+										name="text"
+										placeholder={LINK_BOX_PLACEHOLDER}
+										rows={7} // 10 for v2
+										className="w-full font-mono text-xs resize-none"
+										readOnly={processing}
+										aria-busy={processing}
+										value={linksText}
+										onChange={handleChange}
 									/>
-									Create anonymously (not associated with your YouTube account)
-								</label>
-							)}
 
-							{/* Buttons */}
+									{/* Checkboxes */}
+									<label htmlFor="open-playlist">
+										<input
+											type="checkbox"
+											role="switch"
+											id="open-playlist"
+											name="open-playlist"
+											aria-checked={shouldOpenPlaylist}
+											checked={shouldOpenPlaylist}
+											onChange={handleOpenPlaylistChange}
+										/>
+										Open playlist after creation
+									</label>
 
-							{processing ? (
-								<button
-									type="reset"
-									style={{ backgroundColor: "var(--muted-foreground)" }}
-									onClick={cancelClick}
-								>
-									Cancel
-								</button>
-							) : (
-								<button
-									type="submit"
-									style={{ backgroundColor: "var(--primary)" }}
-									onClick={submitClick}
-								>
-									Create
-								</button>
-							)}
-						</form>
+									{!userOnYouTube ? (
+										<p className="text-xs text-center w-full text-red-600">
+											NOTE: You are not currently on YouTube. Your playlist will
+											be created as unlisted & anonymous.
+										</p>
+									) : !authorised ? (
+										<p className="text-xs text-center w-full text-red-600">
+											NOTE: You are not signed in to YouTube. Your playlist will
+											be created as unlisted & anonymous.
+										</p>
+									) : (
+										<label htmlFor="anonymous-playlist">
+											<input
+												type="checkbox"
+												role="switch"
+												id="anonymous-playlist"
+												name="anonymous-playlist"
+												aria-checked={anonymousPlaylist}
+												checked={anonymousPlaylist}
+												onChange={handleAnonymousPlaylistChange}
+												disabled={!userOnYouTube || !authorised}
+											/>
+											Create anonymously (not associated with your YouTube
+											account)
+										</label>
+									)}
+
+									{/* Buttons */}
+									{processing ? (
+										<button
+											type="reset"
+											style={{ backgroundColor: "var(--muted-foreground)" }}
+											onClick={cancelClick}
+										>
+											Cancel
+										</button>
+									) : (
+										<button
+											type="submit"
+											style={{ backgroundColor: "var(--primary)" }}
+											onClick={submitClick}
+										>
+											Create
+										</button>
+									)}
+								</form>
+							</>
+						)}
 					</section>
 				)}
 
 				{/* Playlists */}
-				{contentScriptLoaded && activeView === ActiveSection.PLAYLISTS && (
-					<section
-						id={ActiveSection.PLAYLISTS}
-					>
+				{activeView === ActiveSection.PLAYLISTS && (
+					<section id={ActiveSection.PLAYLISTS}>
 						<h1 className="text-center">▶</h1>
 						<h2 className="text-center">Your Playlists</h2>
 
