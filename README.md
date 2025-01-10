@@ -2,14 +2,14 @@
 
 ![build](https://github.com/lkekana/youtube-links-to-playlist/workflows/build/badge.svg)
 
-_The main popup shown in both light and dark mode_
+The main popup shown in both light and dark mode
 <p align="center">
   <img src="assets/screenshot1.png" alt="Screenshot 1" style="display:inline-block; width:49%;"/>
   <img src="assets/screenshot2.png" alt="Screenshot 2" style="display:inline-block; width:49%;"/>
 </p>
 
 
-_The additional 'playlists view' for showing playlists created by the extension_
+The additional 'playlists view' for showing playlists created by the extension
 <img src="assets/screenshot3.png" alt="Screenshot 3" style="zoom:67%;" /> 
 
 ## Introduction
@@ -32,7 +32,8 @@ My extension
 
 As of the date of publishing (10 Jan 2025), I've skimmed through the documentation for publishing on the Chrome Web Store. I saw mention of a registration fee and I am painfully broke so I'll update the repo if I ever publish on there or the Mozilla Add-ons store.
 
-For now, you'll have to build it yourself to run it :)
+For now, you can download it [`youtube-playlist-maker.v1.0.0.zip`](https://github.com/lkekana/youtube-links-to-playlist/releases/download/public/youtube-playlist-maker.v1.0.0.zip)
+Full link: [https://github.com/lkekana/youtube-links-to-playlist/releases/download/public/youtube-playlist-maker.v1.0.0.zip](https://github.com/lkekana/youtube-links-to-playlist/releases/download/public/youtube-playlist-maker.v1.0.0.zip) 
 
 ## How I Did It
 
@@ -76,7 +77,7 @@ pnpm build
 ```
 
 #### 4. Load the extension in Chrome:
-   - Open Chrome and navigate to [chrome://extensions/](chrome://extensions).
+   - Open Chrome and navigate to [chrome://extensions/](chrome://extensions)
    - Enable "Developer mode" in the top right corner.
    - Click "Load unpacked" and select the `dist` directory.
 
